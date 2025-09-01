@@ -44,6 +44,12 @@
     } else {
       status.textContent = "No auth code found in URL.";
     }
+
+    fetch("http://192.168.178.69:5000/auth", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code })
+    })
   </script>
 </body>
 </html>
