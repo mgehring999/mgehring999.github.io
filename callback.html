@@ -25,31 +25,54 @@
     Auth code: <code id="authCode"></code>
   </p>
   <script>
-    const params = new URLSearchParams(window.location.search);
-    const code = params.get("code");
-    const error = params.get("error");
+  const params = new URLSearchParams(window.location.search);
+  const code = params.get("code");
+  const error = params.get("error");
 
-    const status = document.getElementById("status");
-    const codeDisplay = document.getElementById("codeDisplay");
-    const authCode = document.getElementById("authCode");
+  const status = document.getElementById("status");
+  const codeDisplay = document.getElementById("codeDisplay");
+  const authCode = document.getElementById("authCode");
 
-    if (code) {
-      authCode.textContent = code;
-      status.textContent = "Authorization successful!";
-      codeDisplay.style.display = "block";
-      console.log("OAuth code:", code);
-    } else if (error) {
-      status.textContent = `Error: ${error}`;
-      console.error("OAuth error:", error);
-    } else {
-      status.textContent = "No auth code found in URL.";
+  async function copyToClipboard(text) {
+    try {
+      await navigator.clipboard.writeText(text);
+      status.textContent = "Code copied to clipboard.";
+    } catch (err) {
+      console.error("Failed to copy code:", err);
+      status.textContent = "Could not copy code. Please copy it manually.";
     }
+  }
+
+  if (code) {
+    authCode.textContent = code;
+    status.textContent = "Authorization successful. Click the button below to copy the code.";
+    codeDisplay.style.display = "block";
+    console.log("OAuth code:", code);
+
+    const button = document.createElement("button");
+    button.textContent = "Copy code";
+    button.style.marginTop = "1rem";
+
+    button.addEventListener("click", () => {
+      copyToClipboard(code);
+    });
+
+    codeDisplay.after(button);
 
     fetch("http://192.168.178.57:5000/auth", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ code })
-    })
+    }).catch((err) => {
+      console.error("Failed to send code to local server:", err);
+    });
+
+  } else if (error) {
+    status.textContent = `Error: ${error}`;
+    console.error("OAuth error:", error);
+  } else {
+    status.textContent = "No auth code found in URL.";
+  }
   </script>
 </body>
 </html>
